@@ -1,13 +1,13 @@
-import React, { useRef, useState, useEffect } from "react";
-import Moveable from "react-moveable";
+import React, { useRef, useState, useEffect } from 'react';
+import Moveable from 'react-moveable';
 
 const App = () => {
   const [moveableComponents, setMoveableComponents] = useState([]);
   const [selected, setSelected] = useState(null);
-
+  const parent = useRef(null);
   const addMoveable = () => {
     // Create a new moveable component and add it to the array
-    const COLORS = ["red", "blue", "yellow", "green", "purple"];
+    const COLORS = ['red', 'blue', 'yellow', 'green', 'purple'];
 
     setMoveableComponents([
       ...moveableComponents,
@@ -18,7 +18,7 @@ const App = () => {
         width: 100,
         height: 100,
         color: COLORS[Math.floor(Math.random() * COLORS.length)],
-        updateEnd: true
+        updateEnd: true,
       },
     ]);
   };
@@ -34,7 +34,7 @@ const App = () => {
   };
 
   const handleResizeStart = (index, e) => {
-    console.log("e", e.direction);
+    console.log('e', e.direction);
     // Check if the resize is coming from the left handle
     const [handlePosX, handlePosY] = e.direction;
     // 0 => center
@@ -45,7 +45,7 @@ const App = () => {
     // -1, 0
     // -1, 1
     if (handlePosX === -1) {
-      console.log("width", moveableComponents, e);
+      console.log('width', moveableComponents, e);
       // Save the initial left and width values of the moveable component
       const initialLeft = e.left;
       const initialWidth = e.width;
@@ -55,16 +55,17 @@ const App = () => {
   };
 
   return (
-    <main style={{ height : "100vh", width: "100vw" }}>
+    <main style={{ height: '100vh', width: '100vw' }}>
       <button onClick={addMoveable}>Add Moveable1</button>
       <div
         id="parent"
         style={{
-          position: "relative",
-          background: "black",
-          height: "80vh",
-          width: "80vw",
+          position: 'relative',
+          background: 'black',
+          height: '80vh',
+          width: '80vw',
         }}
+        ref={parent}
       >
         {moveableComponents.map((item, index) => (
           <Component
@@ -108,9 +109,9 @@ const Component = ({
     id,
   });
 
-  let parent = document.getElementById("parent");
+  let parent = document.getElementById('parent');
   let parentBounds = parent?.getBoundingClientRect();
-  
+
   const onResize = async (e) => {
     // ACTUALIZAR ALTO Y ANCHO
     let newWidth = e.width;
@@ -189,9 +190,9 @@ const Component = ({
       <div
         ref={ref}
         className="draggable"
-        id={"component-" + id}
+        id={'component-' + id}
         style={{
-          position: "absolute",
+          position: 'absolute',
           top: top,
           left: left,
           width: width,
@@ -206,6 +207,20 @@ const Component = ({
         resizable
         draggable
         onDrag={(e) => {
+          console.log({
+            top: e.top,
+            left: e.left,
+            right: e.right,
+            bottom: e.bottom,
+            parentTop: parentBounds.top,
+            parentLeft: parentBounds.left,
+            parentRight: parentBounds.right,
+            parentBottom: parentBounds.bottom,
+            parentHeight: parentBounds.height,
+          });
+          if (e.top < 1 || e.left < 1 || e.bottom < 1 || e.right < 1) {
+            return;
+          }
           updateMoveable(id, {
             top: e.top,
             left: e.left,
@@ -218,9 +233,10 @@ const Component = ({
         onResizeEnd={onResizeEnd}
         keepRatio={false}
         throttleResize={1}
-        renderDirections={["nw", "n", "ne", "w", "e", "sw", "s", "se"]}
+        renderDirections={['nw', 'n', 'ne', 'w', 'e', 'sw', 's', 'se']}
         edge={false}
         zoom={1}
+        bounds={{ ...parentBounds }}
         origin={false}
         padding={{ left: 0, top: 0, right: 0, bottom: 0 }}
       />
