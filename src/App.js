@@ -187,7 +187,7 @@ const Component = ({
     const { drag } = lastEvent;
     const { beforeTranslate } = drag;
     console.log(beforeTranslate);
-    const absoluteTop = top + beforeTranslate[1] < 0;
+    const absoluteTop = top + beforeTranslate[1];
     const absoluteLeft = left + beforeTranslate[0];
 
     console.log({
