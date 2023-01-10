@@ -73,7 +73,17 @@ const App = () => {
 
   return (
     <main style={{ height: '100vh', width: '100vw' }}>
-      <button onClick={addMoveable}>Add Moveable1</button>
+      <button
+        onClick={addMoveable}
+        style={{
+          backgroundColor: '#2af553',
+          borderRadius: '4px',
+          padding: '2px',
+          marginBottom: '10px',
+        }}
+      >
+        Add Moveable1
+      </button>
       <div
         id="parent"
         style={{
@@ -236,7 +246,13 @@ const Component = ({
         />
         {isSelected && (
           <button
-            style={{ position: 'absolute', right: -30 }}
+            style={{
+              position: 'absolute',
+              right: -30,
+              borderRadius: '4px',
+              backgroundColor: '#f52a3e',
+              color: 'white',
+            }}
             onClick={() => remove(id)}
           >
             x
