@@ -4,10 +4,21 @@ import Moveable from 'react-moveable';
 const App = () => {
   const [moveableComponents, setMoveableComponents] = useState([]);
   const [selected, setSelected] = useState(null);
+  const [images, setImages] = useState([]);
   const parent = useRef(null);
+
+  useEffect(() => {
+    getImage();
+  }, []);
+
+  const getImage = async () => {
+    const response = await fetch('https://jsonplaceholder.typicode.com/photos');
+    const data = await response.json();
+    console.log(data);
+    setImages(data);
+  };
   const addMoveable = () => {
     // Create a new moveable component and add it to the array
-    const COLORS = ['red', 'blue', 'yellow', 'green', 'purple'];
 
     setMoveableComponents([
       ...moveableComponents,
@@ -17,7 +28,7 @@ const App = () => {
         left: 0,
         width: 100,
         height: 100,
-        color: COLORS[Math.floor(Math.random() * COLORS.length)],
+        image: images[Math.floor(Math.random() * images.length)].url,
         updateEnd: true,
       },
     ]);
@@ -39,26 +50,26 @@ const App = () => {
     setMoveableComponents(updatedMoveables);
   };
 
-  const handleResizeStart = (index, e) => {
-    console.log('e', e.direction);
-    // Check if the resize is coming from the left handle
-    const [handlePosX, handlePosY] = e.direction;
-    // 0 => center
-    // -1 => top or left
-    // 1 => bottom or right
+  // const handleResizeStart = (index, e) => {
+  //   console.log('e', e.direction);
+  //   // Check if the resize is coming from the left handle
+  //   const [handlePosX, handlePosY] = e.direction;
+  //   // 0 => center
+  //   // -1 => top or left
+  //   // 1 => bottom or right
 
-    // -1, -1
-    // -1, 0
-    // -1, 1
-    if (handlePosX === -1) {
-      console.log('width', moveableComponents, e);
-      // Save the initial left and width values of the moveable component
-      const initialLeft = e.left;
-      const initialWidth = e.width;
+  //   // -1, -1
+  //   // -1, 0
+  //   // -1, 1
+  //   if (handlePosX === -1) {
+  //     console.log('width', moveableComponents, e);
+  //     // Save the initial left and width values of the moveable component
+  //     const initialLeft = e.left;
+  //     const initialWidth = e.width;
 
-      // Set up the onResize event handler to update the left value based on the change in width
-    }
-  };
+  //     // Set up the onResize event handler to update the left value based on the change in width
+  //   }
+  // };
 
   return (
     <main style={{ height: '100vh', width: '100vw' }}>
@@ -78,7 +89,6 @@ const App = () => {
             {...item}
             key={index}
             updateMoveable={updateMoveable}
-            handleResizeStart={handleResizeStart}
             setSelected={setSelected}
             isSelected={selected === item.id}
             remove={removeMoveable}
@@ -98,7 +108,7 @@ const Component = ({
   width,
   height,
   index,
-  color,
+  image,
   id,
   setSelected,
   isSelected = false,
@@ -113,7 +123,7 @@ const Component = ({
     width,
     height,
     index,
-    color,
+    image,
     id,
   });
 
@@ -138,7 +148,7 @@ const Component = ({
       left,
       width: newWidth,
       height: newHeight,
-      color,
+      image,
     });
 
     // ACTUALIZAR NODO REFERENCIA
@@ -176,10 +186,17 @@ const Component = ({
     const { lastEvent } = e;
     const { drag } = lastEvent;
     const { beforeTranslate } = drag;
-
-    const absoluteTop = top + beforeTranslate[1];
+    console.log(beforeTranslate);
+    const absoluteTop = top + beforeTranslate[1] < 0;
     const absoluteLeft = left + beforeTranslate[0];
 
+    console.log({
+      top: absoluteTop,
+      left: absoluteLeft,
+      width: newWidth,
+      height: newHeight,
+      image,
+    });
     updateMoveable(
       id,
       {
@@ -187,7 +204,7 @@ const Component = ({
         left: absoluteLeft,
         width: newWidth,
         height: newHeight,
-        color,
+        image,
       },
       true
     );
@@ -205,10 +222,18 @@ const Component = ({
           left: left,
           width: width,
           height: height,
-          background: color,
         }}
         onClick={() => setSelected(id)}
       >
+        <img
+          src={image}
+          alt="IMG"
+          style={{
+            objectFit: 'cover',
+            width,
+            height,
+          }}
+        />
         {isSelected && (
           <button
             style={{ position: 'absolute', right: -30 }}
@@ -224,17 +249,17 @@ const Component = ({
         resizable
         draggable
         onDrag={(e) => {
-          console.log({
-            top: e.top,
-            left: e.left,
-            right: e.right,
-            bottom: e.bottom,
-            parentTop: parentBounds.top,
-            parentLeft: parentBounds.left,
-            parentRight: parentBounds.right,
-            parentBottom: parentBounds.bottom,
-            parentHeight: parentBounds.height,
-          });
+          // console.log({
+          //   top: e.top,
+          //   left: e.left,
+          //   right: e.right,
+          //   bottom: e.bottom,
+          //   parentTop: parentBounds.top,
+          //   parentLeft: parentBounds.left,
+          //   parentRight: parentBounds.right,
+          //   parentBottom: parentBounds.bottom,
+          //   parentHeight: parentBounds.height,
+          // });
           if (e.top < 1 || e.left < 1 || e.bottom < 1 || e.right < 1) {
             return;
           }
@@ -243,9 +268,10 @@ const Component = ({
             left: e.left,
             width,
             height,
-            color,
+            image,
           });
         }}
+        onDragEnd={console.log}
         onResize={onResize}
         onResizeEnd={onResizeEnd}
         keepRatio={false}
@@ -253,7 +279,6 @@ const Component = ({
         renderDirections={['nw', 'n', 'ne', 'w', 'e', 'sw', 's', 'se']}
         edge={false}
         zoom={1}
-        bounds={{ ...parentBounds }}
         origin={false}
         padding={{ left: 0, top: 0, right: 0, bottom: 0 }}
       />
