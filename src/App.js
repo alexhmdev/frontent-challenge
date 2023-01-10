@@ -23,6 +23,12 @@ const App = () => {
     ]);
   };
 
+  const removeMoveable = (id) => {
+    setMoveableComponents((current) =>
+      current.filter((value, i) => value.id !== id)
+    );
+  };
+
   const updateMoveable = (id, newComponent, updateEnd = false) => {
     const updatedMoveables = moveableComponents.map((moveable, i) => {
       if (moveable.id === id) {
@@ -75,6 +81,7 @@ const App = () => {
             handleResizeStart={handleResizeStart}
             setSelected={setSelected}
             isSelected={selected === item.id}
+            remove={removeMoveable}
           />
         ))}
       </div>
@@ -96,6 +103,7 @@ const Component = ({
   setSelected,
   isSelected = false,
   updateEnd,
+  remove,
 }) => {
   const ref = useRef();
 
@@ -200,7 +208,16 @@ const Component = ({
           background: color,
         }}
         onClick={() => setSelected(id)}
-      />
+      >
+        {isSelected && (
+          <button
+            style={{ position: 'absolute', right: -30 }}
+            onClick={() => remove(id)}
+          >
+            x
+          </button>
+        )}
+      </div>
 
       <Moveable
         target={isSelected && ref.current}
